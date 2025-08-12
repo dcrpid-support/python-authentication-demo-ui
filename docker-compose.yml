@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  python-authentication-demo-ui:
+    build:
+      context: .
+    image: python-authentication-demo-ui-application
+    container_name: python-authentication-demo-ui-application
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+
