@@ -119,9 +119,6 @@ def authenticate(request):
     version = os.environ.get('VERSION')
 
     value['input_ekyc'] = value['input_ekyc'] in ['1', 'true', 't', 'yes', 'y']
-    value['input_otp'] = value['input_otp'] in ['1', 'true', 't', 'yes', 'y']
-    value['input_demo'] = value['input_demo'] in ['1', 'true', 't', 'yes', 'y']
-    value['input_bio'] = value['input_bio'] in ['1', 'true', 't', 'yes', 'y']
     
     auth_url = base_url + '/idauthentication/v1/' + ('kyc/' if value['input_ekyc'] else 'auth/') + os.environ.get('TSP_LICENSE_KEY') + '/' + os.environ.get('PARTNER_ID') + '/' + os.environ.get('API_KEY')
     datetime_now = get_current_time()
