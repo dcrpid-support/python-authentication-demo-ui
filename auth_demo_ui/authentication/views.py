@@ -117,19 +117,24 @@ def authenticate(request):
     partner_private_key_location = f'{base_path}/authentication/keys/{partner_id}/{partner_id}-partner-private-key.pem'
     base_url = os.environ.get('BASE_URL')
     version = os.environ.get('VERSION')
+
+    value['input_ekyc'] = value['input_ekyc'] in ['1', 'true', 't', 'yes', 'y']
+    value['input_otp'] = value['input_otp'] in ['1', 'true', 't', 'yes', 'y']
+    value['input_demo'] = value['input_demo'] in ['1', 'true', 't', 'yes', 'y']
+    value['input_bio'] = value['input_bio'] in ['1', 'true', 't', 'yes', 'y']
     
-    auth_url = base_url + '/idauthentication/v1/' + ('kyc/' if value['input_ekyc'] == 'on' else 'auth/') + os.environ.get('TSP_LICENSE_KEY') + '/' + os.environ.get('PARTNER_ID') + '/' + os.environ.get('API_KEY')
+    auth_url = base_url + '/idauthentication/v1/' + ('kyc/' if value['input_ekyc'] else 'auth/') + os.environ.get('TSP_LICENSE_KEY') + '/' + os.environ.get('PARTNER_ID') + '/' + os.environ.get('API_KEY')
     datetime_now = get_current_time()
     
-    http_request_body['id'] = 'philsys.identity.kyc' if value['input_ekyc'] == 'on' else 'philsys.identity.auth'
+    http_request_body['id'] = 'philsys.identity.kyc' if value['input_ekyc'] else 'philsys.identity.auth'
     http_request_body['version'] = version
     http_request_body['requestTime'] = datetime_now
     http_request_body['env'] = os.environ.get('ENV')
     http_request_body['domainUri'] = base_url
     http_request_body['transactionID'] = transaction_id
-    http_request_body['requestedAuth']['otp'] = value['input_otp'] == 'on'
-    http_request_body['requestedAuth']['demo'] = value['input_demo'] == 'on'
-    http_request_body['requestedAuth']['bio'] = value['input_bio'] == 'on'
+    http_request_body['requestedAuth']['otp'] = value['input_otp']
+    http_request_body['requestedAuth']['demo'] = value['input_demo']
+    http_request_body['requestedAuth']['bio'] = value['input_bio']
     http_request_body['consentObtained'] = True
     http_request_body['individualId'] = value['individual_id']
     http_request_body['individualIdType'] = individual_id_type[value['individual_id_type']]
@@ -139,11 +144,11 @@ def authenticate(request):
     http_request_body_request['demographics'] = None
     http_request_body_request['biometrics'] = None
     
-    if(value['input_otp'] == 'on'):
+    if(value['input_otp']):
         http_request_body_request['otp'] = value['input_otp_value']
-    if(value['input_demo'] == 'on'):
+    if(value['input_demo']):
         http_request_body_request['demographics'] = json.loads(value['input_demo_value'])
-    if(value['input_bio'] == 'on'):
+    if(value['input_bio']):
         http_request_body_request['biometrics'] = json.loads(value['input_bio_value'])
         
     # request

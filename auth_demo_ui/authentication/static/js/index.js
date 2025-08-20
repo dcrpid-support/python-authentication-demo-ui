@@ -434,10 +434,10 @@ $(function() {
                 "individual_id": $("#individual-id").val(),
                 "individual_id_type": $("#individual-id-type").val(),
                 
-                "input_bio": ($("#auth-type-fp").is(':checked') || $("#auth-type-iris").is(':checked') || $("#auth-type-face").is(':checked')) ? "on" : "off",
-                "input_otp": $("#auth-type-otp").is(':checked') ? "on" : "off",
-                "input_demo": $("#auth-type-demo").is(':checked') ? "on" : "off",
-                "input_ekyc": $("#auth-type-ekyc").is(':checked') ? "on" : "off",
+                "input_bio": ($("#auth-type-fp").is(':checked') || $("#auth-type-iris").is(':checked') || $("#auth-type-face").is(':checked')),
+                "input_otp": $("#auth-type-otp").is(':checked'),
+                "input_demo": $("#auth-type-demo").is(':checked'),
+                "input_ekyc": $("#auth-type-ekyc").is(':checked'),
         
                 "input_otp_value": $("#auth-type-otp").is(':checked') ? $("#otp-value").val() : null,
                 "input_demo_value":  $("#auth-type-demo").is(':checked') ? demog_value : null,
