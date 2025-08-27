@@ -25,7 +25,7 @@ def index(request):
     return render(request, 'authenticate.html')
 
 @require_http_methods(["POST"])
-def requestOTP(request, pcn):
+def requestOTP(request):
     base_url = os.environ.get('BASE_URL')
     misp_license_key = os.environ.get('TSP_LICENSE_KEY')
     partner_id = os.environ.get('PARTNER_ID')
@@ -60,16 +60,16 @@ def requestOTP(request, pcn):
     otp_request['version'] = version
     otp_request['transactionID'] = transaction_id
     otp_request['requestTime'] = get_current_time()
-    otp_request['individualId'] = str(pcn)
+    otp_request['individualId'] = str(value['individual_id'])
     otp_request['individualIdType'] = individual_id_type[value['individual_id_type']]
     otp_request['otpChannel'] = otp_channel
     
     otp_request_header['signature'] = create_signature(json.dumps(otp_request), partner_private_key_location)
-    otp_request_header['Authorization'] = get_authorization()
+    otp_request_header['authorization'] = get_authorization()
     otp_request_header['Content-type'] = "application/json"
 
-    if(isinstance(otp_request_header['Authorization'], dict)):
-        return JsonResponse(otp_request_header['Authorization'])
+    if(isinstance(otp_request_header['authorization'], dict)):
+        return JsonResponse(otp_request_header['authorization'])
     
     print(f'OTP Request URL:\n{otp_url}\n')
     print(f'OTP Request Header:\n{str(json.dumps(otp_request_header))}\n')
@@ -77,13 +77,10 @@ def requestOTP(request, pcn):
     
     response = requests.post(otp_url, data=json.dumps(otp_request), headers=otp_request_header, verify=False)
     
-    print(response.status_code)
-    
     # print(f'OTP Response:\n{str(response.json())}\n')
     
     if response.status_code == 200 and not response.json()["errors"]:
         result = decrypt_response(response)
-        print(f'OTP Response:\n{result}\n')
         return JsonResponse(result)
     elif response.status_code <= 599 and response.status_code >= 400:
         response = {
@@ -193,9 +190,9 @@ def authenticate(request):
     response = requests.post(auth_url, headers=http_request_header, data=json.dumps(http_request_body), verify=False)
 
     if response.status_code == 200 and not response.json()["errors"]:
-        result = decrypt_response(response)
-        print(f'Authentication Response:\n{result}\n')
-        return JsonResponse(result)
+        # result = decrypt_response(response)
+        # return JsonResponse(result)
+        return JsonResponse(response)
     elif response.status_code <= 599 and response.status_code >= 400:
         response = {
             "error_code": response.status_code,
@@ -203,5 +200,5 @@ def authenticate(request):
         }
     else:
         response = json.loads(str(response.json()).replace('\'', '"').replace('None', '"None"'))
-    # print(f'Authentication Response: {response}')
+
     return JsonResponse(response)

@@ -255,7 +255,7 @@ $(function() {
                 "accept": "*/*",
                 'X-CSRFToken': csrf_token,
             },
-            url:"/request/otp/" + individual_id,
+            url:"/request/otp/",
             // url:"http://localhost/request/otp/" + individual_id,
             data: JSON.stringify({
                 // _token: _token,
