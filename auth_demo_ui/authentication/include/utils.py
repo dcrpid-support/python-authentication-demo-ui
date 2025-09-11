@@ -5,12 +5,23 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 
+from decouple import Config, RepositoryEnv
+
 from authentication.include.base64 import base64_url_decode
 from authentication.include.crypto import symmetric_decrypt, asymmetric_decrypt
 
 import os, hashlib, binascii
 
 base_path = settings.BASE_DIR
+
+def get_environment():
+    ENV = os.getenv("DJANGO_ENV")
+    ENV_FILE = base_path / (f".env.{ENV}" if ENV else ".env")
+
+    if not ENV_FILE.exists():
+        raise FileNotFoundError(f"❌ {ENV_FILE} not found")
+
+    return Config(RepositoryEnv(str(ENV_FILE)))
 
 def print_hex_binary(data):
     data = data.encode("utf-8")
@@ -37,7 +48,9 @@ def get_thumbprint(fname):
 
 def decrypt_response(response):
     result = {}
-    partner_id = os.environ.get('PARTNER_ID')
+    env = get_environment()
+    
+    partner_id = env('PARTNER_ID')
     
     partner_private_key = open(f'{base_path}/authentication/keys/{partner_id}/{partner_id}-partner-private-key.pem').read()
     partner_private_key_bytes = bytes(partner_private_key, "utf-8")

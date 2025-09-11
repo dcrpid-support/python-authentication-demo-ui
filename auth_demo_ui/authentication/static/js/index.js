@@ -243,10 +243,19 @@ $(function() {
         var individual_id_type = $("#individual-id-type").val();
         var otp_email = $("#otp-email").prop("checked");
         var otp_phone = $("#otp-phone").prop("checked");
+        var otp_channel = [];
         var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $("#loading_screen_message").html("Requesting OTP...")
         $("#loading_screen").show();
+
+        if (otp_email) {
+            otp_channel.push("Email");
+        }
+        
+        if (otp_phone) {
+            otp_channel.push("Phone");
+        }
 
         $.ajax({
             type:"POST",
@@ -261,13 +270,13 @@ $(function() {
                 // _token: _token,
                 individual_id: individual_id,
                 individual_id_type: individual_id_type,
-                otp_email: otp_email,
-                otp_phone: otp_phone,
+                otp_channel: otp_channel,
             }),
             success:function(data) {
                 $("#loading_screen").hide();
                 resetAuthenticationResult();
                 var result = JSON.stringify(data, null, 4);
+                $("#modal-result-header").html("Request OTP result");
                 $("#modal-result-value").text(result);
                 $("#modal-result").modal("toggle");
             }
@@ -416,9 +425,6 @@ $(function() {
             });
         }
         
-        demog_value = JSON.stringify(demog_value);
-        biometric_input = JSON.stringify(biometric_input);
-
         $("#loading_screen_message").html("Authenticating...")
         $("#loading_screen").show();
 
@@ -433,15 +439,12 @@ $(function() {
             body: JSON.stringify({
                 "individual_id": $("#individual-id").val(),
                 "individual_id_type": $("#individual-id-type").val(),
-                
-                "input_bio": ($("#auth-type-fp").is(':checked') || $("#auth-type-iris").is(':checked') || $("#auth-type-face").is(':checked')),
-                "input_otp": $("#auth-type-otp").is(':checked'),
-                "input_demo": $("#auth-type-demo").is(':checked'),
-                "input_ekyc": $("#auth-type-ekyc").is(':checked'),
-        
-                "input_otp_value": $("#auth-type-otp").is(':checked') ? $("#otp-value").val() : null,
-                "input_demo_value":  $("#auth-type-demo").is(':checked') ? demog_value : null,
-                "input_bio_value": ($("#auth-type-fp").is(':checked') || $("#auth-type-iris").is(':checked') || $("#auth-type-face").is(':checked')) ? biometric_input : null,
+
+                "is_ekyc": $("#auth-type-ekyc").is(':checked'),
+
+                "otp_value": $("#auth-type-otp").is(':checked') ? $("#otp-value").val() : null,
+                "demo_value":  $("#auth-type-demo").is(':checked') ? demog_value : null,
+                "bio_value": ($("#auth-type-fp").is(':checked') || $("#auth-type-iris").is(':checked') || $("#auth-type-face").is(':checked')) ? biometric_input : null,
             })
         })
         .then(response => response.json())

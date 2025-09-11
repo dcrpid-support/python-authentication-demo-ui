@@ -1,7 +1,9 @@
-from .utils import get_current_time
+from .utils import get_current_time, get_environment
 from .http_error import handle_status
 
 import os, requests, json
+
+env = get_environment()
 
 def get_authorization():
     http_authorization = {}
@@ -9,13 +11,15 @@ def get_authorization():
     http_authorization['request'] = {}
     datetime_now = get_current_time()
     http_authorization['requestTime'] = datetime_now
-    http_authorization['request']['clientId'] = os.environ.get('CLIENT_ID')
-    http_authorization['request']['secretKey'] = os.environ.get('SECRET_KEY')
-    http_authorization['request']['appId'] = os.environ.get('APP_ID')
+    http_authorization['request']['clientId'] = env('CLIENT_ID')
+    http_authorization['request']['secretKey'] = env('SECRET_KEY')
+    http_authorization['request']['appId'] = env('APP_ID')
     http_autorization_request_body = json.dumps(http_authorization)
     http_authorization_header['content-type'] = 'application/json'
+    
+    authorization_url = f'{env('BASE_URL')}/v1/authmanager/authenticate/clientidsecretkey'
 
-    response = requests.post(os.environ.get('ID_AUTH_MANAGER'), data=http_autorization_request_body, verify=False, headers=http_authorization_header)
+    response = requests.post(authorization_url, data=http_autorization_request_body, verify=False, headers=http_authorization_header)
 
     if response.status_code <= 599 and response.status_code >= 400:
         error_message = {

@@ -1,15 +1,20 @@
 from authlib.jose import JsonWebSignature
 from django.conf import settings
-
-import os
+from .utils import get_environment
 
 base_path = settings.BASE_DIR
 
+env = get_environment()
+
+individual_id_type = {
+    'PCN': 'VID',
+    'AlyasPSN': 'VID',
+}
+
 def create_signature(request, key_location):
-    partner_id = os.environ.get('PARTNER_ID')
+    partner_id = env('PARTNER_ID')
     partner_private_key = open(key_location).read()
     signed_certificate = open(f'{base_path}/authentication/keys/{partner_id}/{partner_id}-signedcertificate.cer').read()
-    # signed_certificate = open(f'./auth_demo_ui/authentication/keys/{partner_id}/{partner_id}-IDAcertificate.cer').read()
     signed_certificate = signed_certificate.replace("\n", "").replace("-----BEGIN CERTIFICATE-----", "").replace("-----END CERTIFICATE-----", "")
 
     jws = JsonWebSignature()
