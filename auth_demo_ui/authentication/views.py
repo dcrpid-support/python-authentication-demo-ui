@@ -190,9 +190,8 @@ def authenticate(request):
     response = requests.post(auth_url, headers=http_request_header, data=json.dumps(http_request_body), verify=False)
 
     if response.status_code == 200 and not response.json()["errors"]:
-        # result = decrypt_response(response)
-        # return JsonResponse(result)
-        return JsonResponse(response)
+        result = decrypt_response(response)
+        return JsonResponse(result)
     elif response.status_code <= 599 and response.status_code >= 400:
         response = {
             "error_code": response.status_code,

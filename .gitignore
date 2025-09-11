@@ -1,5 +1,5 @@
 venv/
-auth_demo_ui/.env
+auth_demo_ui/.env*
 start_project_2.sh
 start_project.sh
 auth_demo_ui/authentication/keys/

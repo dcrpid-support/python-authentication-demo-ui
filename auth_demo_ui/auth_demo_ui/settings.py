@@ -9,15 +9,27 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from pathlib import Path
+import os
+from decouple import Config, RepositoryEnv, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Determine environment
+ENV = os.getenv("DJANGO_ENV")
+ENV_FILE = BASE_DIR / (f".env.{ENV}" if ENV else ".env")
+
+if not ENV_FILE.exists():
+    raise FileNotFoundError(f"❌ {ENV_FILE} not found")
+
+config = Config(RepositoryEnv(str(ENV_FILE)))
+print(f"✅ Loaded config from {ENV_FILE.name}")
+
+# runserver host and port
+RUNSERVER_HOST = config("HOST", default="127.0.0.1")
+RUNSERVER_PORT = config("PORT", default="8000")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -28,9 +40,11 @@ SECRET_KEY = 'django-insecure-d&nosjplg+unw@htn)0i4e!aeyk_ofqro*1s*r1s!p3r8+rdaw
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DJANGO_DEBUG", cast=bool)
 
-ALLOWED_HOSTS = ['*']
+# Allowed hosts
+_raw_hosts = config('DJANGO_ALLOWED_HOSTS', default='', cast=str)
+ALLOWED_HOSTS = ['*'] if _raw_hosts.strip() == '*' else [h.strip() for h in _raw_hosts.split(',') if h.strip()]
 
 # Application definition
 

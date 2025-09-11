@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from django.conf import settings
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -8,6 +9,8 @@ from authentication.include.base64 import base64_url_decode
 from authentication.include.crypto import symmetric_decrypt, asymmetric_decrypt
 
 import os, hashlib, binascii
+
+base_path = settings.BASE_DIR
 
 def print_hex_binary(data):
     data = data.encode("utf-8")
@@ -36,7 +39,7 @@ def decrypt_response(response):
     result = {}
     partner_id = os.environ.get('PARTNER_ID')
     
-    partner_private_key = open(f'./auth_demo_ui/authentication/keys/{partner_id}/{partner_id}-partner-private-key.pem').read()
+    partner_private_key = open(f'{base_path}/authentication/keys/{partner_id}/{partner_id}-partner-private-key.pem').read()
     partner_private_key_bytes = bytes(partner_private_key, "utf-8")
     
     response_session_key_encrypted = base64_url_decode(response.json()["responseSessionKey"])

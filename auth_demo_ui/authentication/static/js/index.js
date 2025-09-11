@@ -466,6 +466,7 @@ $(function() {
                 $("#ekyc_barangay").html(identity.location3_eng ? identity.location3_eng : "N/A");
                 $("#ekyc_postal_code").html(identity.postalCode ? identity.postalCode : "N/A");
                 $("#ekyc_blood_type").html(identity.bloodType_eng ? identity.bloodType_eng : "N/A");
+                $("#ekyc_residence_status").html(identity.residenceStatus_eng ? identity.residenceStatus_eng : "N/A");
                 $("#ekyc_photo").attr("src", "data:image/png;base64," + identity.photo);
 
                 $("#ekyc_result").show();
