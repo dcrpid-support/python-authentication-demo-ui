@@ -11,7 +11,7 @@ from authentication.include.http_error import handle_status
 from authentication.include.signature import create_signature
 from authentication.include.utils import print_hex_binary, get_current_time, get_thumbprint, decrypt_response, get_environment
 
-import os, json, requests, secrets, warnings
+import json, requests, secrets, warnings
 
 warnings.filterwarnings("ignore")
 

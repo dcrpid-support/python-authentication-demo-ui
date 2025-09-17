@@ -471,6 +471,7 @@ $(function() {
                 $("#ekyc_blood_type").html(identity.bloodType_eng ? identity.bloodType_eng : "N/A");
                 $("#ekyc_residence_status").html(identity.residenceStatus_eng ? identity.residenceStatus_eng : "N/A");
                 $("#ekyc_photo").attr("src", "data:image/png;base64," + identity.photo);
+                $("#ekyc_auth_token").html(data.authToken ? data.authToken : "N/A");
 
                 $("#ekyc_result").show();
             }

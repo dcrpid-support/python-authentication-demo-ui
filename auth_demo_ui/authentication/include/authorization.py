@@ -1,7 +1,7 @@
 from .utils import get_current_time, get_environment
 from .http_error import handle_status
 
-import os, requests, json
+import requests, json
 
 env = get_environment()
 
