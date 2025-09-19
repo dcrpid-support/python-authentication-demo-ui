@@ -10,7 +10,7 @@ from decouple import Config, RepositoryEnv
 from authentication.include.base64 import base64_url_decode
 from authentication.include.crypto import symmetric_decrypt, asymmetric_decrypt
 
-import os, hashlib, binascii
+import os, hashlib, binascii, random
 
 base_path = settings.BASE_DIR
 
@@ -63,3 +63,6 @@ def decrypt_response(response):
     result["response"] = symmetric_decrypt(response_encrypted, result["response_session_key"])
     
     return result["response"]
+
+def create_transaction_id(length):
+    return random.randint(0, 10**length - 1)

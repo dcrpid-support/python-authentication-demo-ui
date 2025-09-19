@@ -9,7 +9,7 @@ from authentication.include.base64 import base64_url_safe_string
 from authentication.include.crypto import symmetric_encrypt, asymmetric_encrypt
 from authentication.include.http_error import handle_status
 from authentication.include.signature import create_signature
-from authentication.include.utils import print_hex_binary, get_current_time, get_thumbprint, decrypt_response, get_environment
+from authentication.include.utils import print_hex_binary, get_current_time, get_thumbprint, decrypt_response, get_environment, create_transaction_id
 
 import json, requests, secrets, warnings
 
@@ -23,6 +23,9 @@ individual_id_type_value = {
     'AlyasPSN': 'VID',
 }
 
+otp_transactions = {}
+transaction_id_length = 10
+
 def index(request):
     return render(request, 'authenticate.html')
 
@@ -35,6 +38,7 @@ def requestOTP(request):
         partner_api_key = env('API_KEY')
         version = env('VERSION')
         value = json.loads(request.body)
+        transaction_id = f'{create_transaction_id(transaction_id_length)}'
 
         print(f'Request: {value}\n')
         
@@ -51,10 +55,10 @@ def requestOTP(request):
 
         if errors:
             return JsonResponse(errors, safe=False)
-
-        transaction_id = "1234567890"
-        partner_private_key_location = f'{base_path}/authentication/keys/{partner_id}/{partner_id}-partner-private-key.pem'
         
+        otp_transactions[value['individual_id']] = transaction_id
+        
+        partner_private_key_location = f'{base_path}/authentication/keys/{partner_id}/{partner_id}-partner-private-key.pem'
         otp_url = f'{base_url}/idauthentication/v1/otp/{misp_license_key}/{partner_id}/{partner_api_key}'
         
         otp_request = {}
@@ -106,8 +110,8 @@ def authenticate(request):
         http_request_body['request'] = {}
         http_request_body_request = {}
 
-        transaction_id = "1234567890"
         value = json.loads(request.body)   
+        transaction_id = otp_transactions.get(value['individual_id'], None) if bool(value['otp_value']) else create_transaction_id(transaction_id_length)
 
         print(f"Request Body: {request.body}\n\n")
         print(f"Request Method: {request.method}\n")
@@ -135,6 +139,12 @@ def authenticate(request):
         
         if not value['otp_value'] and not value['demo_value'] and not value['bio_value']:
             errors.append({'error': 'Individual information is required'})
+            
+        if bool(value['otp_value']):
+            if not transaction_id:
+                errors.append({'error': 'OTP request is required.'})
+            else:
+                del otp_transactions[value['individual_id']]
 
         if errors:
             return JsonResponse(errors, safe=False)
