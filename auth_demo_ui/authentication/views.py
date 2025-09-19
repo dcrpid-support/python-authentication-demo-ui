@@ -140,14 +140,14 @@ def authenticate(request):
         if not value['otp_value'] and not value['demo_value'] and not value['bio_value']:
             errors.append({'error': 'Individual information is required'})
             
-        if bool(value['otp_value']):
-            if not transaction_id:
-                errors.append({'error': 'OTP request is required.'})
-            else:
-                del otp_transactions[value['individual_id']]
+        if bool(value['otp_value']) and not transaction_id:
+            errors.append({'error': 'OTP request is required.'})
 
         if errors:
             return JsonResponse(errors, safe=False)
+        else:
+            if bool(value['otp_value']):
+                del otp_transactions[value['individual_id']]
         
         http_request_body['id'] = 'philsys.identity.kyc' if value['is_ekyc'] else 'philsys.identity.auth'
         http_request_body['version'] = version
