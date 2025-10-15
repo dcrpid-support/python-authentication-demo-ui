@@ -244,7 +244,6 @@ $(function() {
         var otp_email = $("#otp-email").prop("checked");
         var otp_phone = $("#otp-phone").prop("checked");
         var otp_channel = [];
-        var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $("#loading_screen_message").html("Requesting OTP...")
         $("#loading_screen").show();
@@ -257,30 +256,31 @@ $(function() {
             otp_channel.push("Phone");
         }
 
-        $.ajax({
-            type:"POST",
+        fetch("http://192.168.152.16:3000/request/otp/", {
+            method: "POST",
             headers: {
-                "content-type": "application/json",
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCsrfToken(),
                 "accept": "*/*",
-                'X-CSRFToken': csrf_token,
             },
-            url:"/request/otp/",
-            // url:"http://localhost/request/otp/" + individual_id,
-            data: JSON.stringify({
-                // _token: _token,
+            body: JSON.stringify({
                 individual_id: individual_id,
                 individual_id_type: individual_id_type,
                 otp_channel: otp_channel,
-            }),
-            success:function(data) {
-                $("#loading_screen").hide();
-                resetAuthenticationResult();
-                var result = JSON.stringify(data, null, 4);
-                $("#modal-result-header").html("Request OTP result");
-                $("#modal-result-value").text(result);
-                $("#modal-result").modal("toggle");
-            }
-         });
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            $("#loading_screen").hide();
+            resetAuthenticationResult();
+            var result = JSON.stringify(data, null, 4);
+            $("#modal-result-header").html("Request OTP result");
+            $("#modal-result-value").text(result);
+            $("#modal-result").modal("toggle");
+        })
+        .catch(error => {
+            console.log("Error: " + error);
+        });
     });
 
     var biometric_input = "";
@@ -363,7 +363,6 @@ $(function() {
             body: JSON.stringify({
                 "env": "Staging",
                 "purpose": "Auth",
-                // "specVersion": "0.9.5.1.5",
                 "specVersion": version,
                 "timeout": "300000",
                 "captureTime": date,
@@ -411,7 +410,6 @@ $(function() {
 
     $("#send-auth-request").click(function() {
         var demog_value = {};
-        var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         if($("#auth-type-demo").is(':checked')) {
             $.each(ids, function(key, value) {
@@ -434,7 +432,7 @@ $(function() {
             headers: {
                 "content-type": "application/json",
                 "accept": "*/*",
-                "X-CSRFToken": csrf_token,
+                "X-CSRFToken": getCsrfToken(),
             },
             body: JSON.stringify({
                 "individual_id": $("#individual-id").val(),
@@ -540,4 +538,8 @@ function resetAuthenticationResult() {
     $("#ekyc_postal_code").html("");
     $("#ekyc_blood_type").html("");
     $("#ekyc_photo").removeAttr("src");
+}
+
+const getCsrfToken = () => {
+    return $('meta[name="csrf-token"]').attr('content');
 }
